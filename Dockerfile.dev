@@ -4,6 +4,9 @@ WORKDIR /app
 
 COPY package*.json ./
 
+# Prisma schema is needed by the postinstall script
+COPY prisma ./prisma
+
 RUN npm install
 
 COPY . .

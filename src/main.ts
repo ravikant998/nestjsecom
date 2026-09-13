@@ -12,11 +12,13 @@ import { ResponseTransformInterceptor } from './common/interceptors/response.int
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Application configuration
+  // Configuration
   const configService = app.get(ConfigService);
 
   // API prefix
-  app.setGlobalPrefix(configService.get<string>('app.apiPrefix') ?? 'api/v1');
+  const apiPrefix = configService.get<string>('app.apiPrefix') ?? 'api/v1';
+
+  app.setGlobalPrefix(apiPrefix);
 
   // Security
   app.use(helmet());
@@ -66,7 +68,6 @@ async function bootstrap() {
     .addTag('users', 'User management')
     .build();
 
-  // Create Swagger document
   const document = SwaggerModule.createDocument(app, swaggerConfig);
 
   // Swagger UI
@@ -76,15 +77,11 @@ async function bootstrap() {
     },
   });
 
-  // Port
-  const port = configService.get<number>('app.port') ?? 3000;
+  // Vercel provides PORT in production.
+  // 3000 is used when running locally.
+  const port = Number(process.env.PORT) || 3000;
 
-  // Start application
   await app.listen(port);
-
-  console.log(`Application running on http://localhost:${port}`);
-
-  console.log(`Swagger running on http://localhost:${port}/docs`);
 }
 
 void bootstrap();
