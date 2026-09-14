@@ -1,4 +1,3 @@
-
 {
   "name": "nestdemo",
   "version": "0.0.1",
@@ -29,7 +28,7 @@
     "@nestjs/config": "^4.0.4",
     "@nestjs/core": "^11.0.1",
     "@nestjs/jwt": "^12.0.1",
-    "@nestjs/passport": "^12.0.0",
+    "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.0",
     "@nestjs/swagger": "^11.4.7",
     "@prisma/adapter-pg": "^7.10.0",
@@ -96,4 +95,3 @@
     "testEnvironment": "node"
   }
 }
-
