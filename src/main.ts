@@ -1,6 +1,6 @@
 import compression from 'compression';
-import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
@@ -9,24 +9,23 @@ import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { ResponseTransformInterceptor } from './common/interceptors/response.interceptor';
 
-async function bootstrap() {
+export async function createApp() {
   const app = await NestFactory.create(AppModule);
 
-  // Configuration
   const configService = app.get(ConfigService);
 
-  // API prefix
   const apiPrefix = configService.get<string>('app.apiPrefix') ?? 'api/v1';
 
   app.setGlobalPrefix(apiPrefix);
 
-  // Security
-  app.use(helmet());
+  app.use(
+    helmet({
+      crossOriginResourcePolicy: false,
+    }),
+  );
 
-  // Compression
   app.use(compression());
 
-  // CORS
   app.enableCors({
     origin: true,
     credentials: true,
@@ -40,7 +39,6 @@ async function bootstrap() {
     ],
   });
 
-  // Global validation
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -52,13 +50,10 @@ async function bootstrap() {
     }),
   );
 
-  // Global exception filter
   app.useGlobalFilters(new AllExceptionsFilter());
 
-  // Global response interceptor
   app.useGlobalInterceptors(new ResponseTransformInterceptor());
 
-  // Swagger configuration
   const swaggerConfig = new DocumentBuilder()
     .setTitle('NestDemo API')
     .setDescription('NestJS Authentication API')
@@ -70,15 +65,20 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, swaggerConfig);
 
-  // Swagger UI
   SwaggerModule.setup('docs', app, document, {
     swaggerOptions: {
       persistAuthorization: true,
     },
   });
 
-  // Vercel provides PORT in production.
-  // 3000 is used when running locally.
+  await app.init();
+
+  return app;
+}
+
+async function bootstrap(): Promise<void> {
+  const app = await createApp();
+
   const port = Number(process.env.PORT) || 3000;
 
   await app.listen(port);
